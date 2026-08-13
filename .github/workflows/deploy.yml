@@ -301,6 +301,10 @@ jobs:
           echo -e "\nTest 4: App endpoint"
           kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/
 
+          # Intentionally fail to verify rollback is triggered
+          echo -e "\nTest 5: Intentional failure trigger"
+          kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/fail || exit 1
+
       - name: Rollback on test failure
         if: failure()
         run: |
