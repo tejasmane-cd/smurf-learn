@@ -193,7 +193,7 @@ jobs:
 
       - name: Deploy with Smurf Helm
         run: |
-          smurf selm upgrade --install ${{ env.APP_NAME }} helm/${{ env.APP_NAME }} \
+          smurf selm upgrade --install ${{ env.APP_NAME }} ./helm/${{ env.APP_NAME }} \
             --namespace ${{ env.NAMESPACE }} \
             --create-namespace \
             --wait \
