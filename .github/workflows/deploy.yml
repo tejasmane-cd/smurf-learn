@@ -326,15 +326,14 @@ jobs:
       - name: Roll back failed deployment
         shell: bash
         run: |
-          echo " Smoke tests failed, initiating rollback..."
-          helm history ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }}
+          echo "❌ Smoke tests failed, initiating rollback via Smurf..."
 
-          if helm rollback ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }} --wait=false; then
-            echo " Rollback initiated."
+          if smurf selm rollback ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }} --wait=false; then
+            echo "✅ Rollback via Smurf completed."
             sleep 10
-            helm status ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }}
+            smurf selm status ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }}
           else
-            echo " Rollback failed."
+            echo "❌ Rollback failed."
             exit 1
           fi
 
