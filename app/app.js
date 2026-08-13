@@ -15,12 +15,17 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/ready', (req, res) => {
-  res.status(200).json({ ready: true });
+  res.status(200).json({
+    app: 'simple-app',
+    ready: true,
+    version: APP_VERSION
+  });
 });
 
 app.get('/', (req, res) => {
   requestCount++;
   res.json({
+    app: 'simple-app',
     message: 'Hello from simple app!',
     version: APP_VERSION,
     requestCount: requestCount,

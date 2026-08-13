@@ -301,9 +301,8 @@ jobs:
           kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/
           if [ $? -ne 0 ]; then exit 1; fi
 
-          echo -e "\nTest 5: Intentional failure trigger"
-          kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/fail
-          exit $?
+          echo "All smoke tests passed."
+          exit 0
 
   auto-rollback:
     needs: [smoke-tests, version]
