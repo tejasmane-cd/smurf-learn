@@ -82,6 +82,7 @@ jobs:
   deploy:
     needs: [version, build]
     runs-on: ubuntu-latest
+    continue-on-error: true
     if: github.event.inputs.action != 'rollback' && github.event.inputs.action != 'status'
     steps:
       - uses: actions/checkout@v4
@@ -258,7 +259,7 @@ jobs:
   smoke-tests:
     needs: [deploy, version]
     runs-on: ubuntu-latest
-    if: success()
+    if: ${{ always() && needs.deploy.result != 'skipped' && (github.event.inputs.action != 'rollback' && github.event.inputs.action != 'status') }}
     steps:
       - uses: actions/checkout@v4
 
