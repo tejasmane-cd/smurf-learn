@@ -8,7 +8,11 @@ const INTENTIONAL_FAILURE = process.env.INTENTIONAL_FAILURE === 'true';
 let requestCount = 0;
 
 app.get('/health', (req, res) => {
-  res.status(500).json({ error: 'broken' });
+  res.status(200).json({ 
+    status: 'healthy',
+    version: APP_VERSION,
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.get('/ready', (req, res) => {
