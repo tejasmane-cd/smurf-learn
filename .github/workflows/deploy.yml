@@ -330,14 +330,14 @@ jobs:
         shell: bash
         run: |
           echo "❌ Smoke tests failed, initiating rollback..."
+          helm history ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }}
 
-          if helm rollback ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }} --wait --timeout 5m; then
-            echo "✅ Rollback completed successfully."
+          if helm rollback ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }} --wait=false; then
+            echo "✅ Rollback initiated."
+            sleep 10
             helm status ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }}
-            exit 0
           else
             echo "❌ Rollback failed."
-            helm status ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }}
             exit 1
           fi
 
