@@ -170,7 +170,13 @@ jobs:
                       port: 8080
                     initialDelaySeconds: 5
                     periodSeconds: 5
-                  resources: {{ toYaml .Values.resources | nindent 18 }}
+                  resources:
+                    limits:
+                      cpu: "250m"
+                      memory: "256Mi"
+                    requests:
+                      cpu: "100m"
+                      memory: "128Mi"
           EOF
 
           # Service template
