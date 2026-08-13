@@ -95,7 +95,7 @@ git push origin v1.2.0
 
 ### Build image locally
 ```bash
-docker build -t simple-app:test --build-arg APP_VERSION=test .
+docker build -t simple-app:test --build-arg APP_VERSION=test app
 docker run -p 8080:8080 simple-app:test
 ```
 
@@ -166,11 +166,13 @@ kubectl get events -n default --sort-by='.lastTimestamp' | tail -10
 ## File Structure
 ```
 .
-├── app.js                      # Node.js app
-├── Dockerfile                  # Container image
-├── package.json               # Dependencies
-├── deploy-with-rollback.yml   # GitHub Actions workflow
-└── DEPLOY_GUIDE.md           # This file
+├── .github/workflows/deploy.yml # GitHub Actions workflow
+└── app/
+    ├── app.js                   # Node.js app
+    ├── Dockerfile               # Container image
+    ├── package.json             # Dependencies
+    ├── package-lock.json        # Locked dependencies
+    └── DEPLOY_GUIDE.md          # This file
 ```
 
 ---
