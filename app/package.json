@@ -1,0 +1,16 @@
+{
+  "name": "simple-app",
+  "version": "1.0.0",
+  "description": "Simple app for EKS deployment with Smurf",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "APP_VERSION=dev node app.js"
+  },
+  "keywords": ["eks", "smurf", "deployment"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
