@@ -197,7 +197,7 @@ jobs:
             --namespace ${{ env.NAMESPACE }} \
             --create-namespace \
             --wait \
-            --timeout=5m0s
+            --timeout=300
 
       - name: Wait for rollout
         run: |
