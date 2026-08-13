@@ -235,10 +235,10 @@ jobs:
           echo "Testing pod: $POD"
           
           if ! kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/health | jq .; then
-            echo " Health check failed"
+            echo "Health check failed"
             exit 1
           fi
-          echo " Health check passed"
+          echo "Health check passed"
 
       - name: Save deployment info
         if: success()
@@ -329,14 +329,14 @@ jobs:
       - name: Roll back failed deployment
         shell: bash
         run: |
-          echo "❌ Smoke tests failed, initiating rollback..."
+          echo "Smoke tests failed, initiating rollback..."
 
           if helm rollback ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }}; then
-            echo "✅ Rollback completed successfully."
+            echo "Rollback completed successfully."
             sleep 10
             helm status ${{ env.APP_NAME }} --namespace ${{ env.NAMESPACE }}
           else
-            echo "❌ Rollback failed."
+            echo "Rollback failed."
             exit 1
           fi
 
