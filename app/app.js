@@ -8,20 +8,7 @@ const INTENTIONAL_FAILURE = process.env.INTENTIONAL_FAILURE === 'true';
 let requestCount = 0;
 
 app.get('/health', (req, res) => {
-  if (INTENTIONAL_FAILURE) {
-    return res.status(500).json({
-      status: 'unhealthy',
-      version: APP_VERSION,
-      error: 'Intentional failure for rollback test',
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  res.status(200).json({
-    status: 'healthy',
-    version: APP_VERSION,
-    timestamp: new Date().toISOString()
-  });
+  res.status(500).json({ error: 'broken' });
 });
 
 app.get('/ready', (req, res) => {
