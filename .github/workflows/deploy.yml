@@ -131,7 +131,7 @@ jobs:
           EOF
 
           # Deployment template
-          cat > helm/${{ env.APP_NAME }}/templates/deployment.yaml <<'EOF'
+          cat > helm/${{ env.APP_NAME }}/templates/deployment.yaml <<'DEPLOYMENT'
           apiVersion: apps/v1
           kind: Deployment
           metadata:
@@ -177,7 +177,7 @@ jobs:
                     requests:
                       cpu: "100m"
                       memory: "128Mi"
-          EOF
+          DEPLOYMENT
 
           # Service template
           cat > helm/${{ env.APP_NAME }}/templates/service.yaml <<'EOF'
