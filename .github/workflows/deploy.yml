@@ -273,40 +273,57 @@ jobs:
             --name ${{ env.EKS_CLUSTER }}
 
       - name: Run smoke tests
+        shell: bash
         run: |
+          set +e
           echo "=== Running Smoke Tests for ${{ env.EKS_CLUSTER }} ==="
-          
-          # Wait for pod to be ready
+
           kubectl wait --for=condition=ready pod \
             -l app=${{ env.APP_NAME }} \
             -n ${{ env.NAMESPACE }} \
             --timeout=60s
 
-          # Get pod name
           POD=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.APP_NAME }} -o jsonpath='{.items[0].metadata.name}')
-          
-          # Test 1: Health endpoint
+
           echo "Test 1: Health endpoint"
           kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/health
-          
-          # Test 2: Ready endpoint
+          if [ $? -ne 0 ]; then exit 1; fi
+
           echo -e "\nTest 2: Ready endpoint"
           kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/ready
-          
-          # Test 3: Version endpoint
+          if [ $? -ne 0 ]; then exit 1; fi
+
           echo -e "\nTest 3: Version endpoint"
           kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/version
-          
-          # Test 4: Main app endpoint
+          if [ $? -ne 0 ]; then exit 1; fi
+
           echo -e "\nTest 4: App endpoint"
           kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/
+          if [ $? -ne 0 ]; then exit 1; fi
 
-          # Intentionally fail to verify rollback is triggered
           echo -e "\nTest 5: Intentional failure trigger"
-          kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/fail || exit 1
+          kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/fail
+          exit $?
 
-      - name: Rollback on test failure
-        if: failure()
+  auto-rollback:
+    needs: [smoke-tests, version]
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.smoke-tests.result == 'failure' && (github.event_name != 'workflow_dispatch' || github.event.inputs.action == 'deploy') }}
+    steps:
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region ${{ env.AWS_REGION }} \
+            --name ${{ env.EKS_CLUSTER }}
+
+      - name: Roll back failed deployment
         run: |
           echo "❌ Smoke tests failed, initiating rollback..."
           kubectl rollout undo deployment/${{ env.APP_NAME }} -n ${{ env.NAMESPACE }}
