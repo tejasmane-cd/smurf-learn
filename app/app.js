@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/version', (req, res) => {
-  res.status(500).json({ error: 'Intentional rollback test failure' });
+  res.json({ version: APP_VERSION });
 });
 
 // Simulate failure endpoint for testing rollback
