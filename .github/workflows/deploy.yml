@@ -42,12 +42,13 @@ jobs:
           else
             VERSION="${GITHUB_RUN_NUMBER}.$(date +%s)"
           fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=$DOCKER_REGISTRY/$DOCKER_IMAGE:$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$DOCKER_REGISTRY/$DOCKER_IMAGE:$VERSION" >> "$GITHUB_OUTPUT"
 
   build:
     needs: version
     runs-on: ubuntu-latest
+    if: github.event.inputs.action != 'rollback' && github.event.inputs.action != 'status'
     permissions:
       contents: read
       packages: write
@@ -109,8 +110,8 @@ jobs:
           cat > helm/${{ env.APP_NAME }}/Chart.yaml <<'EOF'
           apiVersion: v2
           name: simple-app
-          version: ${{ needs.version.outputs.version }}
-          appVersion: ${{ needs.version.outputs.version }}
+          version: "0.1.0"
+          appVersion: "${{ needs.version.outputs.version }}"
           EOF
 
           # values.yaml
@@ -138,7 +139,7 @@ jobs:
             name: {{ .Chart.Name }}
             labels:
               app: {{ .Chart.Name }}
-              version: {{ .Chart.AppVersion }}
+              version: "{{ .Chart.AppVersion }}"
           spec:
             replicas: {{ .Values.replicaCount }}
             selector:
@@ -227,9 +228,7 @@ jobs:
           POD=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.APP_NAME }} -o jsonpath='{.items[0].metadata.name}')
           echo "Testing pod: $POD"
           
-          kubectl exec -n ${{ env.NAMESPACE }} $POD -- curl -s http://localhost:8080/health | jq .
-          
-          if [ $? -ne 0 ]; then
+          if ! kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/health | jq .; then
             echo "❌ Health check failed"
             exit 1
           fi
@@ -283,19 +282,19 @@ jobs:
           
           # Test 1: Health endpoint
           echo "Test 1: Health endpoint"
-          kubectl exec -n ${{ env.NAMESPACE }} $POD -- curl -sf http://localhost:8080/health
+          kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/health
           
           # Test 2: Ready endpoint
           echo -e "\nTest 2: Ready endpoint"
-          kubectl exec -n ${{ env.NAMESPACE }} $POD -- curl -sf http://localhost:8080/ready
+          kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/ready
           
           # Test 3: Version endpoint
           echo -e "\nTest 3: Version endpoint"
-          kubectl exec -n ${{ env.NAMESPACE }} $POD -- curl -sf http://localhost:8080/version
+          kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/version
           
           # Test 4: Main app endpoint
           echo -e "\nTest 4: App endpoint"
-          kubectl exec -n ${{ env.NAMESPACE }} $POD -- curl -sf http://localhost:8080/
+          kubectl exec -n ${{ env.NAMESPACE }} "$POD" -- curl -sf http://localhost:8080/
 
       - name: Rollback on test failure
         if: failure()

@@ -2,8 +2,10 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+RUN apk add --no-cache curl
+
 COPY package.json package-lock.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 COPY app.js .
 
